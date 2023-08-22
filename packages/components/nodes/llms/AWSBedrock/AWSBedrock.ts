@@ -24,7 +24,7 @@ class AWSBedrock_LLMs implements INode {
     constructor() {
         this.label = 'AWS Bedrock'
         this.name = 'awsBedrock'
-        this.version = 1.0
+        this.version = 1.1
         this.type = 'AWSBedrock'
         this.icon = 'awsBedrock.png'
         this.category = 'LLMs'
@@ -86,10 +86,16 @@ class AWSBedrock_LLMs implements INode {
                 name: 'model',
                 type: 'options',
                 options: [
-                    {
-                        label: 'Anthropic Claude v2',
-                        name: 'anthropic.claude-v2'
-                    }
+                    {"label":"amazon.titan-tg1-large","name":"amazon.titan-tg1-large"},
+                    {"label":"amazon.titan-e1t-medium","name":"amazon.titan-e1t-medium"},
+                    {"label":"stability.stable-diffusion-xl","name":"stability.stable-diffusion-xl"},
+                    {"label":"ai21.j2-grande-instruct","name":"ai21.j2-grande-instruct"},
+                    {"label":"ai21.j2-jumbo-instruct","name":"ai21.j2-jumbo-instruct"},
+                    {"label":"ai21.j2-mid","name":"ai21.j2-mid"},
+                    {"label":"ai21.j2-ultra","name":"ai21.j2-ultra"},
+                    {"label":"anthropic.claude-instant-v1","name":"anthropic.claude-instant-v1"},
+                    {"label":"anthropic.claude-v1","name":"anthropic.claude-v1"},
+                    {"label":"anthropic.claude-v2","name":"anthropic.claude-v2"}
                 ],
                 default: 'anthropic.claude-v2',
                 optional: false
