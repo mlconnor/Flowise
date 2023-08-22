@@ -138,7 +138,7 @@ class AWSBedrock_LLMs implements INode {
                 description: 'Top K parameter may not apply to certain model. Please check available model parameters',
                 optional: false,
                 default: 25
-                /*additionalParams: true*/
+                additionalParams: true
             }
         ]
     }
@@ -169,7 +169,7 @@ class AWSBedrock_LLMs implements INode {
           stop_sequences :      iStop_sequences
         }
 
-        console.log("AWS OBJ", JSON.stringify(obj))
+        //console.log("AWS OBJ", JSON.stringify(obj))
 
         const amazonBedrock = new AWSBedrock(obj)
         return amazonBedrock

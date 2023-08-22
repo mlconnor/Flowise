@@ -292,12 +292,12 @@ async function getEmbedding(text: string, config: AWSBedrockEmbeddingsParams) : 
         if ( ! json.embedding ) {
             throw "error retrieving embeddings " + JSON.stringify(json)
         }
-        console.log("result", json)
+        //console.log("result", json)
         //const embedNumbers : Array<number> = (Array<number>) json.embedding
         const embedNumbers : number[] = json.embedding as number[]
-        console.log("AWSBedrockEmbedding", embedNumbers)
+        //console.log("AWSBedrockEmbedding", embedNumbers)
         return embedNumbers
-        console.log("AWSBedrock Embeddings Result", json)
+        //console.log("AWSBedrock Embeddings Result", json)
     } catch (e) {
         console.log(e)
         throw e
