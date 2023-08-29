@@ -1,6 +1,6 @@
 import { ICommonObject, INode, INodeData, INodeParams } from '../../../src/Interface'
 import { getBaseClasses, getCredentialData, getCredentialParam } from '../../../src/utils'
-import { AWSBedrock, AWSBedrockInput } from './core'
+import { Bedrock, BedrockInput } from 'langchain/llms/bedrock'
 
 /**
  * I had to run the following to build the component
@@ -29,12 +29,13 @@ class AWSBedrock_LLMs implements INode {
         this.icon = 'awsBedrock.png'
         this.category = 'LLMs'
         this.description = 'Wrapper around AWS Bedrock large language models'
-        this.baseClasses = [this.type, ...getBaseClasses(AWSBedrock)]
+        this.baseClasses = [this.type, ...getBaseClasses(Bedrock)]
         this.credential = {
             label: 'AWS Credential',
             name: 'credential',
             type: 'credential',
-            credentialNames: ['awsApi']
+            credentialNames: ['awsApi'],
+            optional: true
         }
         this.inputs = [
             {
@@ -137,14 +138,14 @@ class AWSBedrock_LLMs implements INode {
                 step: 10,
                 description: 'Top K parameter may not apply to certain model. Please check available model parameters',
                 optional: false,
-                default: 25
+                default: 25,
                 additionalParams: true
             }
         ]
     }
 
     async init(nodeData: INodeData, _: string, options: ICommonObject): Promise<any> {
-        const iRegion = nodeData.inputs?.region as string 
+        const iRegion = nodeData.inputs?.region as string
         const iModel = nodeData.inputs?.model as string
         const iTemperature = nodeData.inputs?.temperature as string
         const iMax_tokens_to_sample = nodeData.inputs?.max_tokens_to_sample as string
@@ -152,26 +153,34 @@ class AWSBedrock_LLMs implements INode {
         const iTop_k = nodeData.inputs?.top_k as string
         const iStop_sequences = [] as Array<string>
 
-        const credentialData = await getCredentialData(nodeData.credential ?? '', options)
-        const credentialApiKey = getCredentialParam('awsKey', credentialData, nodeData)
-        const credentialApiSecret = getCredentialParam('awsSecret', credentialData, nodeData)
-
-
-        const obj: AWSBedrockInput = {
-          aws_key :             credentialApiKey,
-          aws_secret :          credentialApiSecret,
-          region:               iRegion,
-          model :               iModel,
-          max_tokens_to_sample: parseInt(iMax_tokens_to_sample,10),
-          temperature :         parseFloat(iTemperature),
-          top_k :               parseInt(iTop_k, 10),
-          top_p :               parseFloat(iTop_p),
-          stop_sequences :      iStop_sequences
+        const obj: Partial<BedrockInput> = {
+            model: iModel,
+            region: iRegion,
+            temperature: parseFloat(iTemperature),
+            maxTokens: parseInt(iMax_tokens_to_sample, 10)
         }
 
-        //console.log("AWS OBJ", JSON.stringify(obj))
+        /**
+         * Long-term credentials specified in LLM configuration are optional.
+         * Bedrock's credential provider falls back to the AWS SDK to fetch
+         * credentials from the running environment.
+         * When specified, we override the default provider with configured values.
+         * @see https://github.com/aws/aws-sdk-js-v3/blob/main/packages/credential-provider-node/README.md
+         */
+        const credentialData = await getCredentialData(nodeData.credential ?? '', options)
+        if (credentialData && Object.keys(credentialData).length !== 0) {
+            const credentialApiKey = getCredentialParam('awsKey', credentialData, nodeData)
+            const credentialApiSecret = getCredentialParam('awsSecret', credentialData, nodeData)
+            const credentialApiSession = getCredentialParam('awsSession', credentialData, nodeData)
 
-        const amazonBedrock = new AWSBedrock(obj)
+            obj.credentials = {
+                accessKeyId: credentialApiKey,
+                secretAccessKey: credentialApiSecret,
+                sessionToken: credentialApiSession
+            }
+        }
+
+        const amazonBedrock = new Bedrock(obj)
         return amazonBedrock
     }
 }
