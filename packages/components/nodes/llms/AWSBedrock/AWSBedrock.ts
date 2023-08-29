@@ -24,7 +24,7 @@ class AWSBedrock_LLMs implements INode {
     constructor() {
         this.label = 'AWS Bedrock'
         this.name = 'awsBedrock'
-        this.version = 1.1
+        this.version = 1.2
         this.type = 'AWSBedrock'
         this.icon = 'awsBedrock.png'
         this.category = 'LLMs'
