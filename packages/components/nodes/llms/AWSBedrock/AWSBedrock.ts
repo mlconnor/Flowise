@@ -120,26 +120,6 @@ class AWSBedrock_LLMs implements INode {
                 optional: false,
                 default: 200,
                 additionalParams: false
-            },
-            {
-                label: 'Top Probability',
-                name: 'top_p',
-                type: 'number',
-                step: 0.1,
-                description: 'Top Probability parameter may not apply to certain model. Please check available model parameters',
-                optional: false,
-                additionalParams: true,
-                default: 0.5
-            },
-            {
-                label: 'Top K',
-                name: 'top_k',
-                type: 'number',
-                step: 10,
-                description: 'Top K parameter may not apply to certain model. Please check available model parameters',
-                optional: false,
-                default: 25,
-                additionalParams: true
             }
         ]
     }
@@ -149,9 +129,6 @@ class AWSBedrock_LLMs implements INode {
         const iModel = nodeData.inputs?.model as string
         const iTemperature = nodeData.inputs?.temperature as string
         const iMax_tokens_to_sample = nodeData.inputs?.max_tokens_to_sample as string
-        const iTop_p = nodeData.inputs?.top_p as string
-        const iTop_k = nodeData.inputs?.top_k as string
-        const iStop_sequences = [] as Array<string>
 
         const obj: Partial<BedrockInput> = {
             model: iModel,
