@@ -53,7 +53,7 @@ export class AWSBedrock extends LLM implements AWSBedrockInput {
 
       let url = 'https://bedrock.' + this.region + '.amazonaws.com/model/' + this.model + '/invoke'
       const apiUrl = new URL(url);
-      //console.log("calling bedrock with prompt> " + prompt, "OPTIONS",options)
+      console.log("calling bedrock > " + apiUrl + " : promp > " + prompt, "OPTIONS",options)
 
       const signer = new SignatureV4({
         service: 'bedrock',
@@ -78,7 +78,7 @@ export class AWSBedrock extends LLM implements AWSBedrockInput {
           }
         }
         prompt = "Human: " + messages.join("\n\n") + "\n\nAssistant:"
-        //console.log("fixed message prompt> " + prompt)
+        console.log("fixed message prompt> " + prompt)
       }
 
       let requestBody = {
@@ -109,9 +109,14 @@ export class AWSBedrock extends LLM implements AWSBedrockInput {
         method: 'POST'
       }).then((res) => res.json());
 
-      //console.log("RESULT",result)
-      const completion = result.completion
-      //console.log("result", completion)
+      console.log("RESULT",result)
+      let completion = "No result"
+      if ( result.completion ) {
+        completion = result.completion
+      } else if ( result.message ) {
+        completion = "ERROR: " + result.message
+      }
+      console.log("result", completion)
       return completion
     }
 }

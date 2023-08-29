@@ -137,7 +137,7 @@ class AWSBedrock_LLMs implements INode {
                 step: 10,
                 description: 'Top K parameter may not apply to certain model. Please check available model parameters',
                 optional: false,
-                default: 25
+                default: 25,
                 additionalParams: true
             }
         ]
