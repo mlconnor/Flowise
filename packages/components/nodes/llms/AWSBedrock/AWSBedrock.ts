@@ -3,6 +3,7 @@ import { getBaseClasses, getCredentialData, getCredentialParam } from '../../../
 import { Bedrock } from 'langchain/llms/bedrock'
 import { BaseBedrockInput } from 'langchain/dist/util/bedrock'
 
+
 /**
  * I had to run the following to build the component
  * and get the icon copied over to the dist directory
@@ -29,7 +30,7 @@ class AWSBedrock_LLMs implements INode {
         this.type = 'AWSBedrock'
         this.icon = 'awsBedrock.png'
         this.category = 'LLMs'
-        this.description = 'Wrapper around AWS Bedrock large language models'
+        this.description = 'A small rapper around AWS Bedrock large language models'
         this.baseClasses = [this.type, ...getBaseClasses(Bedrock)]
         this.credential = {
             label: 'AWS Credential',
@@ -146,6 +147,8 @@ class AWSBedrock_LLMs implements INode {
          * @see https://github.com/aws/aws-sdk-js-v3/blob/main/packages/credential-provider-node/README.md
          */
         const credentialData = await getCredentialData(nodeData.credential ?? '', options)
+        console.log("DEBUGGING BEDROCK")
+
         if (credentialData && Object.keys(credentialData).length !== 0) {
             const credentialApiKey = getCredentialParam('awsKey', credentialData, nodeData)
             const credentialApiSecret = getCredentialParam('awsSecret', credentialData, nodeData)
@@ -158,9 +161,34 @@ class AWSBedrock_LLMs implements INode {
             }
         }
 
+        let origMethod = Bedrock.prototype._call
         const amazonBedrock = new Bedrock(obj)
+        Bedrock.prototype._call = function() {
+            let prompt = arguments[0]
+            let mungedPrompt = prompt
+
+            //console.log("Bedrock model " + iModel)
+            if ( iModel.toLowerCase().indexOf('claude') >= 0 ) {
+                console.log("Claude munging...")
+                if ( ! prompt.match(/^\s*Human:/) ) {
+                    mungedPrompt = "Human: " + mungedPrompt
+                }
+                if ( ! prompt.match(/Assistant:\s*$/) ) {
+
+                    mungedPrompt = mungedPrompt + "\n\nAssistant:"
+                }
+            }
+            //console.log("Bedrock Prompt =============================================\n" + mungedPrompt + "\n" +
+            //                           "=============================================\n")
+            arguments[0] = mungedPrompt
+            // @ts-ignore 
+            var r = origMethod.apply(this, arguments);
+            return r
+        }
+
         return amazonBedrock
     }
 }
+
 
 module.exports = { nodeClass: AWSBedrock_LLMs }
