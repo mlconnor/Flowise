@@ -147,7 +147,7 @@ class AWSBedrock_LLMs implements INode {
          * @see https://github.com/aws/aws-sdk-js-v3/blob/main/packages/credential-provider-node/README.md
          */
         const credentialData = await getCredentialData(nodeData.credential ?? '', options)
-        console.log("DEBUGGING BEDROCK")
+        //console.log("DEBUGGING BEDROCK")
 
         if (credentialData && Object.keys(credentialData).length !== 0) {
             const credentialApiKey = getCredentialParam('awsKey', credentialData, nodeData)
@@ -169,7 +169,7 @@ class AWSBedrock_LLMs implements INode {
 
             //console.log("Bedrock model " + iModel)
             if ( iModel.toLowerCase().indexOf('claude') >= 0 ) {
-                console.log("Claude munging...")
+                //console.log("Claude munging ===== ", prompt)
                 if ( ! prompt.match(/^\s*Human:/) ) {
                     mungedPrompt = "Human: " + mungedPrompt
                 }
@@ -183,6 +183,7 @@ class AWSBedrock_LLMs implements INode {
             arguments[0] = mungedPrompt
             // @ts-ignore 
             var r = origMethod.apply(this, arguments);
+            //console.log("returned from bedrock")
             return r
         }
 
