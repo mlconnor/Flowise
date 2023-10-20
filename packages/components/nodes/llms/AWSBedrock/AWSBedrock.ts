@@ -161,35 +161,48 @@ class AWSBedrock_LLMs implements INode {
             }
         }
 
-        let origMethod = Bedrock.prototype._call
         const amazonBedrock = new Bedrock(obj)
-        Bedrock.prototype._call = function() {
-            let prompt = arguments[0]
-            let mungedPrompt = prompt
-
-            //console.log("Bedrock model " + iModel)
-            if ( iModel.toLowerCase().indexOf('claude') >= 0 ) {
-                //console.log("Claude munging ===== ", prompt)
-                if ( ! prompt.match(/^\s*Human:/) ) {
-                    mungedPrompt = "Human: " + mungedPrompt
-                }
-                if ( ! prompt.match(/Assistant:\s*$/) ) {
-
-                    mungedPrompt = mungedPrompt + "\n\nAssistant:"
-                }
-            }
-            //console.log("Bedrock Prompt =============================================\n" + mungedPrompt + "\n" +
-            //                           "=============================================\n")
-            arguments[0] = mungedPrompt
-            // @ts-ignore 
-            var r = origMethod.apply(this, arguments);
-            //console.log("returned from bedrock")
-            return r
-        }
-
         return amazonBedrock
     }
 }
 
+/**
+  * This certainly needs some explanation.
+  * Currently with Claude models, if you don't
+  * start the prompt with Human: and end it with
+  * Assistant:, an error is thrown. For RAG examples
+  * in Flowise, we don't have a lot of control of the
+  * end of the prompt because that's where the RAG
+  * inserts go. Here we check to see if the prompt
+  * has a Human: and Assistant: tag and if not, 
+  * we inject it. I don't really like this approach.
+  * I can think of two better ways to do this. 1/ we
+  * could build custom prompt objects for Bedrock Claude that
+  * handle this type of thing. 2/ we can handle this
+  * at the langchain layer.
+  */
+const origMethod = Bedrock.prototype._call
+Bedrock.prototype._call = function() {
+  let prompt = arguments[0]
+  let mungedPrompt = prompt
+  let iModel = this.lc_kwargs.model
+  //console.log("Intercepting Bedrock with args", arguments)
+  //console.log("Intercepting Bedrock with model", this.lc_kwargs.model)
+  if ( iModel.toLowerCase().indexOf('claude') >= 0 ) {
+    //console.log("Claude munging ===== ", prompt)
+    if ( ! prompt.match(/^\s*Human:/) ) {
+      mungedPrompt = "Human: " + mungedPrompt
+    }
+    if ( ! prompt.match(/Assistant:\s*$/) ) {
+      mungedPrompt = mungedPrompt + "\n\nAssistant:"
+    }
+  }
+  //console.log("Bedrock Prompt =============================================\n" + mungedPrompt + "\n" + "=============================================\n")
+  arguments[0] = mungedPrompt
+  // @ts-ignore 
+  var r = origMethod.apply(this, arguments);
+  //console.log("returned from bedrock")
+  return r
+}
 
 module.exports = { nodeClass: AWSBedrock_LLMs }
