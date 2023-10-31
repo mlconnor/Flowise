@@ -23,11 +23,6 @@ RUN git clone https://github.com/mlconnor/Flowise
 
 WORKDIR /Flowise
 
-# let's change the settings
-RUN cp /Flowise/packages/server/.env.example /Flowise/packages/server/.env
-# here we are going to establish an encryption key that is stable across builds
-RUN sed -i 's/# FLOWISE_SECRETKEY_OVERWRITE=myencryptionkey/FLOWISE_SECRETKEY_OVERWRITE=stableencryptionkey/g' /Flowise/packages/server/.env
-
 RUN yarn install
 
 RUN NODE_OPTIONS="--max-old-space-size=8192" yarn build
